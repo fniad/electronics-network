@@ -6,8 +6,7 @@ from django.conf import settings
 
 class Manufacturer(models.Model):
     """ Производитель """
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True,
-                              verbose_name='владелец')
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, editable=False)
     name = models.CharField(max_length=255, verbose_name='название')
     email = models.EmailField(verbose_name='электронная почта')
     country = models.CharField(max_length=255, verbose_name='страна')
@@ -16,8 +15,7 @@ class Manufacturer(models.Model):
     house_number = models.CharField(max_length=20, verbose_name='номер дома')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='дата создания')
     level = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(0)], default=0,
-                                verbose_name='уровень в иерархии')  # 0 для производителя
-
+                                verbose_name='уровень в иерархии')
     def get_supplier(self):
         if self.level > 0:
             return self
@@ -34,8 +32,7 @@ class Manufacturer(models.Model):
 
 class RetailNetwork(models.Model):
     """ Розничная сеть """
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True,
-                              verbose_name='владелец')
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, editable=False)
     name = models.CharField(max_length=255, verbose_name='название')
     email = models.EmailField(verbose_name='электронная почта')
     country = models.CharField(max_length=255, verbose_name='страна')
@@ -48,7 +45,7 @@ class RetailNetwork(models.Model):
     retail_network = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE,
                                        verbose_name='розничная сеть')
     level = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(2)], default=1,
-                                verbose_name='уровень в иерархии')  # 1 для розничной сети
+                                verbose_name='уровень в иерархии')
 
     def clean(self):
         if self.level == 1 and self.manufacturer is None:
@@ -74,9 +71,7 @@ class RetailNetwork(models.Model):
 
 class IndividualEntrepreneur(models.Model):
     """ Индивидуальный предприниматель """
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True,
-                              verbose_name='владелец')
-
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, editable=False)
     name = models.CharField(max_length=255, verbose_name='имя')
     email = models.EmailField(verbose_name='электронная почта')
     country = models.CharField(max_length=255, verbose_name='страна')
@@ -89,8 +84,8 @@ class IndividualEntrepreneur(models.Model):
                                      verbose_name='производитель')
     retail_network = models.ForeignKey(RetailNetwork, null=True, blank=True, on_delete=models.CASCADE,
                                        verbose_name='розничная сеть')
-    level = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(2)],
-                                verbose_name='уровень в иерархии')  # 2 для индивидуального предпринимателя
+    level = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(2)], default=2,
+                                verbose_name='уровень в иерархии')
 
     def clean(self):
         if self.level == 1 and not self.manufacturer:
@@ -123,8 +118,7 @@ class IndividualEntrepreneur(models.Model):
 
 class Product(models.Model):
     """ Продукт """
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True,
-                              verbose_name='владелец')
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, editable=False)
     name = models.CharField(max_length=255, verbose_name='название')
     model = models.CharField(max_length=255, verbose_name='модель')
     release_date = models.DateField(verbose_name='дата выхода на рынок')
@@ -134,6 +128,7 @@ class Product(models.Model):
                                      verbose_name='производитель')
     retailers = models.ManyToManyField(RetailNetwork, blank=True, verbose_name='розничные сети')
     entrepreneurs = models.ManyToManyField(IndividualEntrepreneur, blank=True, verbose_name='предприниматели')
+
 
     def get_supplier_levels(self):
         supplier_levels = []
@@ -160,9 +155,7 @@ class Product(models.Model):
 
 class Transaction(models.Model):
     """ Продажи """
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True,
-                              verbose_name='владелец')
-
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, editable=False)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True,
                                 related_name='transactions', verbose_name='продукт')
 
