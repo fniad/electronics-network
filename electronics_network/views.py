@@ -2,8 +2,9 @@ import django_filters
 from rest_framework import viewsets, filters
 from electronics_network.models import Manufacturer, RetailNetwork, IndividualEntrepreneur, Product, Transaction
 from electronics_network.permissions import IsOwnerOrSuperuser
-from electronics_network.serializers import ManufacturerSerializer, RetailNetworkSerializer, \
-    IndividualEntrepreneurSerializer, ProductSerializer, TransactionSerializer
+from electronics_network.serializers import ManufacturerSerializer, ProductSerializer, \
+    TransactionSerializer, IndividualEntrepreneurWriteSerializer, \
+    IndividualEntrepreneurReadSerializer, RetailNetworkWriteSerializer, RetailNetworkReadSerializer
 from electronics_network.filters import ManufacturerFilter, ProductFilter
 
 
@@ -22,10 +23,15 @@ class ManufacturerViewSet(viewsets.ModelViewSet):
         else:
             return Manufacturer.objects.filter(owner=user)
 
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(owner=self.request.user)
+
 
 class RetailNetworkViewSet(viewsets.ModelViewSet):
     """ Розничная сеть """
-    serializer_class = RetailNetworkSerializer
     permission_classes = [IsOwnerOrSuperuser]
 
     def get_queryset(self):
@@ -35,10 +41,21 @@ class RetailNetworkViewSet(viewsets.ModelViewSet):
         else:
             return RetailNetwork.objects.filter(owner=user)
 
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return RetailNetworkWriteSerializer
+        else:
+            return RetailNetworkReadSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(owner=self.request.user)
+
 
 class IndividualEntrepreneurViewSet(viewsets.ModelViewSet):
     """ Индивидуальный предприниматель """
-    serializer_class = IndividualEntrepreneurSerializer
     permission_classes = [IsOwnerOrSuperuser]
 
     def get_queryset(self):
@@ -47,6 +64,18 @@ class IndividualEntrepreneurViewSet(viewsets.ModelViewSet):
             return IndividualEntrepreneur.objects.all()
         else:
             return IndividualEntrepreneur.objects.filter(owner=user)
+
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return IndividualEntrepreneurWriteSerializer
+        else:
+            return IndividualEntrepreneurReadSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(owner=self.request.user)
 
 
 class ProductViewSet(viewsets.ModelViewSet):
@@ -64,6 +93,12 @@ class ProductViewSet(viewsets.ModelViewSet):
         else:
             return Product.objects.filter(owner=user)
 
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(owner=self.request.user)
+
 
 class TransactionViewSet(viewsets.ModelViewSet):
     """ Продажи """
@@ -76,3 +111,9 @@ class TransactionViewSet(viewsets.ModelViewSet):
             return Transaction.objects.all()
         else:
             return Transaction.objects.filter(owner=user)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(owner=self.request.user)
