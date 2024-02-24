@@ -1,7 +1,7 @@
 import django_filters
 from rest_framework import viewsets, filters
 from electronics_network.models import Manufacturer, RetailNetwork, IndividualEntrepreneur, Product, Transaction
-from electronics_network.permissions import IsOwnerOrSuperuser
+from electronics_network.permissions import IsOwnerOrSuperuser, IsActiveAuthenticatedUser
 from electronics_network.serializers import ManufacturerSerializer, ProductSerializer, \
     TransactionSerializer, IndividualEntrepreneurWriteSerializer, \
     IndividualEntrepreneurReadSerializer, RetailNetworkWriteSerializer, RetailNetworkReadSerializer
@@ -11,7 +11,7 @@ from electronics_network.filters import ManufacturerFilter, ProductFilter
 class ManufacturerViewSet(viewsets.ModelViewSet):
     """ Производитель """
     serializer_class = ManufacturerSerializer
-    permission_classes = [IsOwnerOrSuperuser]
+    permission_classes = [IsOwnerOrSuperuser, IsActiveAuthenticatedUser]
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend, filters.SearchFilter]
     filterset_class = ManufacturerFilter
     search_fields = ['name', 'country']
@@ -32,7 +32,7 @@ class ManufacturerViewSet(viewsets.ModelViewSet):
 
 class RetailNetworkViewSet(viewsets.ModelViewSet):
     """ Розничная сеть """
-    permission_classes = [IsOwnerOrSuperuser]
+    permission_classes = [IsOwnerOrSuperuser, IsActiveAuthenticatedUser]
 
     def get_queryset(self):
         user = self.request.user
@@ -56,7 +56,7 @@ class RetailNetworkViewSet(viewsets.ModelViewSet):
 
 class IndividualEntrepreneurViewSet(viewsets.ModelViewSet):
     """ Индивидуальный предприниматель """
-    permission_classes = [IsOwnerOrSuperuser]
+    permission_classes = [IsOwnerOrSuperuser, IsActiveAuthenticatedUser]
 
     def get_queryset(self):
         user = self.request.user
@@ -81,7 +81,7 @@ class IndividualEntrepreneurViewSet(viewsets.ModelViewSet):
 class ProductViewSet(viewsets.ModelViewSet):
     """ Продукт """
     serializer_class = ProductSerializer
-    permission_classes = [IsOwnerOrSuperuser]
+    permission_classes = [IsOwnerOrSuperuser, IsActiveAuthenticatedUser]
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend, filters.SearchFilter]
     filterset_class = ProductFilter
     search_fields = ['name', 'model']
@@ -103,7 +103,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 class TransactionViewSet(viewsets.ModelViewSet):
     """ Продажи """
     serializer_class = TransactionSerializer
-    permission_classes = [IsOwnerOrSuperuser]
+    permission_classes = [IsOwnerOrSuperuser, IsActiveAuthenticatedUser]
 
     def get_queryset(self):
         user = self.request.user
