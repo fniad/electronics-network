@@ -1,4 +1,4 @@
-""" Тесты для authorization_service """
+""" Тесты для electronics_network """
 import json
 
 import pytest

@@ -1,4 +1,4 @@
-""" Пагинаторы приложения users """
+""" Пагинаторы приложения electronics_network """
 from rest_framework.pagination import PageNumberPagination
 
 
