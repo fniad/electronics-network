@@ -1,6 +1,8 @@
 import django_filters
 from rest_framework import viewsets, filters
 from electronics_network.models import Manufacturer, RetailNetwork, IndividualEntrepreneur, Product, Transaction
+from electronics_network.pagination import ManufacturerPagination, RetailNetworkPagination, \
+    IndividualEntrepreneurPagination, ProductPagination, TransactionPagination
 from electronics_network.permissions import IsOwnerOrSuperuser, IsActiveAuthenticatedUser
 from electronics_network.serializers import ManufacturerSerializer, ProductSerializer, \
     TransactionSerializer, IndividualEntrepreneurWriteSerializer, \
@@ -15,6 +17,7 @@ class ManufacturerViewSet(viewsets.ModelViewSet):
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend, filters.SearchFilter]
     filterset_class = ManufacturerFilter
     search_fields = ['name', 'country']
+    pagination_class = ManufacturerPagination
 
     def get_queryset(self):
         user = self.request.user
@@ -33,6 +36,7 @@ class ManufacturerViewSet(viewsets.ModelViewSet):
 class RetailNetworkViewSet(viewsets.ModelViewSet):
     """ Розничная сеть """
     permission_classes = [IsOwnerOrSuperuser, IsActiveAuthenticatedUser]
+    pagination_class = RetailNetworkPagination
 
     def get_queryset(self):
         user = self.request.user
@@ -57,6 +61,7 @@ class RetailNetworkViewSet(viewsets.ModelViewSet):
 class IndividualEntrepreneurViewSet(viewsets.ModelViewSet):
     """ Индивидуальный предприниматель """
     permission_classes = [IsOwnerOrSuperuser, IsActiveAuthenticatedUser]
+    pagination_class = IndividualEntrepreneurPagination
 
     def get_queryset(self):
         user = self.request.user
@@ -85,6 +90,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend, filters.SearchFilter]
     filterset_class = ProductFilter
     search_fields = ['name', 'model']
+    pagination_class = ProductPagination
 
     def get_queryset(self):
         user = self.request.user
@@ -104,6 +110,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
     """ Продажи """
     serializer_class = TransactionSerializer
     permission_classes = [IsOwnerOrSuperuser, IsActiveAuthenticatedUser]
+    pagination_class = TransactionPagination
 
     def get_queryset(self):
         user = self.request.user
