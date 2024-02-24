@@ -119,8 +119,8 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'model', 'release_date', 'created_at', 'owner', 'manufacturer', 'retailers', 'entrepreneurs']
 
 
-class TransactionSerializer(serializers.ModelSerializer):
-    """ Продажи """
+class TransactionReadSerializer(serializers.ModelSerializer):
+    """ Транзакция для чтения """
     product = serializers.StringRelatedField()
     seller_manufacturer = serializers.StringRelatedField()
     seller_retail_network = serializers.StringRelatedField()
@@ -132,3 +132,53 @@ class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = '__all__'
+
+
+class TransactionWriteSerializer(serializers.ModelSerializer):
+    """ Транзакция для записи """
+    class Meta:
+        model = Transaction
+        fields = '__all__'
+        extra_kwargs = {
+            'product': {'required': True},
+            'seller_manufacturer': {'required': True},
+            'seller_retail_network': {'required': True},
+            'seller_individual_entrepreneur': {'required': True},
+            'buyer_manufacturer': {'required': True},
+            'buyer_retail_network': {'required': True},
+            'buyer_individual_entrepreneur': {'required': True},
+        }
+
+    def validate(self, data):
+        seller_fields = [
+            data['seller_manufacturer'],
+            data['seller_retail_network'],
+            data['seller_individual_entrepreneur'],
+        ]
+
+        buyer_fields = [
+            data['buyer_manufacturer'],
+            data['buyer_retail_network'],
+            data['buyer_individual_entrepreneur'],
+        ]
+
+        if sum(bool(field) for field in seller_fields) != 1:
+            raise serializers.ValidationError("Выберите только одно поле продавца.")
+
+        if sum(bool(field) for field in buyer_fields) != 1:
+            raise serializers.ValidationError("Выберите только одно поле покупателя.")
+
+        product_suppliers = set()
+
+        if data['product'].manufacturer:
+            product_suppliers.add(data['product'].manufacturer)
+
+        product_suppliers.update(data['product'].retailers.all())
+        product_suppliers.update(data['product'].entrepreneurs.all())
+
+        seller = next((field for field in seller_fields if field), None)
+
+        if seller not in product_suppliers:
+            raise serializers.ValidationError("Продавец не совпадает с поставщиком транзакции.")
+
+        return data

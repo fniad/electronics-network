@@ -5,8 +5,8 @@ from electronics_network.pagination import ManufacturerPagination, RetailNetwork
     IndividualEntrepreneurPagination, ProductPagination, TransactionPagination
 from electronics_network.permissions import IsOwnerOrSuperuser, IsActiveAuthenticatedUser
 from electronics_network.serializers import ManufacturerSerializer, ProductSerializer, \
-    TransactionSerializer, IndividualEntrepreneurWriteSerializer, \
-    IndividualEntrepreneurReadSerializer, RetailNetworkWriteSerializer, RetailNetworkReadSerializer
+    IndividualEntrepreneurWriteSerializer, IndividualEntrepreneurReadSerializer, RetailNetworkWriteSerializer,\
+    RetailNetworkReadSerializer, TransactionReadSerializer, TransactionWriteSerializer
 from electronics_network.filters import ManufacturerFilter, ProductFilter
 
 
@@ -22,9 +22,9 @@ class ManufacturerViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.is_superuser:
-            return Manufacturer.objects.all()
+            return Manufacturer.objects.all().order_by('pk')
         else:
-            return Manufacturer.objects.filter(owner=user)
+            return Manufacturer.objects.filter(owner=user).order_by('pk')
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -41,9 +41,9 @@ class RetailNetworkViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.is_superuser:
-            return RetailNetwork.objects.all()
+            return RetailNetwork.objects.all().order_by('pk')
         else:
-            return RetailNetwork.objects.filter(owner=user)
+            return RetailNetwork.objects.filter(owner=user).order_by('pk')
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:
@@ -66,9 +66,9 @@ class IndividualEntrepreneurViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.is_superuser:
-            return IndividualEntrepreneur.objects.all()
+            return IndividualEntrepreneur.objects.all().order_by('pk')
         else:
-            return IndividualEntrepreneur.objects.filter(owner=user)
+            return IndividualEntrepreneur.objects.filter(owner=user).order_by('pk')
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:
@@ -95,9 +95,9 @@ class ProductViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.is_superuser:
-            return Product.objects.all()
+            return Product.objects.all().order_by('pk')
         else:
-            return Product.objects.filter(owner=user)
+            return Product.objects.filter(owner=user).order_by('pk')
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -108,16 +108,21 @@ class ProductViewSet(viewsets.ModelViewSet):
 
 class TransactionViewSet(viewsets.ModelViewSet):
     """ Продажи """
-    serializer_class = TransactionSerializer
     permission_classes = [IsOwnerOrSuperuser, IsActiveAuthenticatedUser]
     pagination_class = TransactionPagination
 
     def get_queryset(self):
         user = self.request.user
         if user.is_superuser:
-            return Transaction.objects.all()
+            return Transaction.objects.all().order_by('pk')
         else:
-            return Transaction.objects.filter(owner=user)
+            return Transaction.objects.filter(owner=user).order_by('pk')
+
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrieve']:
+            return TransactionReadSerializer
+        return TransactionWriteSerializer
+
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
